@@ -1,0 +1,10 @@
+output   = "models"
+wipe     = true
+no_tests = true
+
+[psql]
+  dbname = "postgres"
+  host   = "idletradinghero.postgres.database.azure.com"
+  port   = 5432
+  schema = "public"
+  blacklist = ["pg_buffercache", "pg_stat_statements"]

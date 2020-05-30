@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+    dev:
+        image: idle-trading-hero-web:latest
+        environment:
+            - JWT_SECRET_KEY
+            - PSQL_CONNECTION_STRING
+        build:
+            context: ./
+            target: dev
+        expose:
+            - "8080"
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./:/go/src/app
+        command: CompileDaemon -log-prefix=false --build='go build -o main .' --command='./main'
