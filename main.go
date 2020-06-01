@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"database/sql"
 	"log"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 func main() {
 	// Database config
 	connectionString := os.Getenv("PSQL_CONNECTION_STRING")
+	fmt.Println(connectionString)
 	db, err := sql.Open("postgres", connectionString)
 
 	if err != nil {
