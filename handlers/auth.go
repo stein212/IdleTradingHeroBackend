@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,6 +19,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/gorilla/securecookie"
 	"github.com/julienschmidt/httprouter"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -40,14 +40,65 @@ var (
 type AuthController struct {
 	db           *sql.DB
 	jwtSecretKey []byte
+	secureCookie *securecookie.SecureCookie
+	domain       string
 }
 
-func (controller *AuthController) Init(db *sql.DB, jwtSecretKey string) {
-	controller.db = db
-	controller.jwtSecretKey = []byte(jwtSecretKey)
+func NewAuthController(config *ControllerConfig) *AuthController {
+	return &AuthController{
+		db:           config.DB,
+		jwtSecretKey: []byte(config.JWTSecretKey),
+		secureCookie: config.SecureCookie,
+		domain:       config.Domain,
+	}
 }
 
 func (controller *AuthController) GetAccessTokenByPassword(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	user, err := controller.authByPassword(w, r)
+
+	if err != nil {
+		// response handled by authByPassword
+		return
+	}
+
+	token, err := controller.generateAccessToken(user)
+
+	if err != nil {
+		logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	payload := viewmodels.GetAccessToken{
+		AccessToken: token,
+	}
+
+	routehelpers.RespondJSON(w, payload)
+}
+
+func (controller *AuthController) GetCookieAuthByPassword(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	user, err := controller.authByPassword(w, r)
+
+	if err != nil {
+		// response handled by authByPassword
+		return
+	}
+
+	cookie, err := controller.generateCookieAuth(user)
+
+	if err != nil {
+		logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, cookie)
+
+	w.WriteHeader(200)
+}
+
+// Returns a user if correct username and password. Will handle writing response if return err
+func (controller *AuthController) authByPassword(w http.ResponseWriter, r *http.Request) (*models.User, error) {
 	loginUser := &viewmodels.LoginUser{}
 
 	errPayload := routehelpers.DecodeJSONBody(w, r, loginUser)
@@ -55,7 +106,7 @@ func (controller *AuthController) GetAccessTokenByPassword(w http.ResponseWriter
 	if errPayload != nil {
 		logger.Println(errPayload)
 		routehelpers.RespondWithErrorPayload(logger, w, errPayload)
-		return
+		return nil, errPayload
 	}
 
 	// check request
@@ -72,7 +123,7 @@ func (controller *AuthController) GetAccessTokenByPassword(w http.ResponseWriter
 		}
 
 		routehelpers.RespondWithErrorPayloadFromErrorResponses(logger, w, http.StatusUnprocessableEntity, errorResponses)
-		return
+		return nil, errs
 	}
 
 	username := strings.ToUpper(loginUser.Username)
@@ -82,39 +133,18 @@ func (controller *AuthController) GetAccessTokenByPassword(w http.ResponseWriter
 		errMessage := fmt.Sprintf("Failed login attempt: Non existent user (%s)\n", user.Username)
 		logger.Println(errMessage)
 		w.WriteHeader(http.StatusUnauthorized)
-		return
+		return nil, err
 	}
 
-	logger.Println(user.Password, loginUser.Password)
 	err = auth.CheckPassword(user, loginUser.Password)
 
 	if err != nil {
 		logger.Println(err)
 		w.WriteHeader(http.StatusUnauthorized)
-		return
+		return nil, err
 	}
 
-	token, err := controller.generateAccessToken(user)
-
-	if err != nil {
-		logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	payload := viewmodels.GetAccessToken{
-		AccessToken: token,
-	}
-
-	jsonPayload, err := json.Marshal(payload)
-
-	if err != nil {
-		logger.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	routehelpers.RespondJSON(w, jsonPayload)
+	return user, nil
 }
 
 func (controller *AuthController) Register(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -210,4 +240,28 @@ func (controller *AuthController) generateAccessToken(user *models.User) (string
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString(controller.jwtSecretKey)
+}
+
+func (controller *AuthController) generateCookieAuth(user *models.User) (*http.Cookie, error) {
+	accessToken, err := controller.generateAccessToken(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	encoded, err := controller.secureCookie.Encode(constants.CookieAuthName, accessToken)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cookie := &http.Cookie{
+		Name:   constants.CookieAuthName,
+		Value:  encoded,
+		Domain: controller.domain,
+		// Secure: true, // TODO: make development environment https
+		HttpOnly: true,
+	}
+
+	return cookie, nil
 }

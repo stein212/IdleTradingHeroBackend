@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -20,14 +19,8 @@ func GetUsers(db *sql.DB) func(w http.ResponseWriter, r *http.Request, _ httprou
 		if err != nil {
 			log.Println(err)
 		}
-		userResponses := utils.MapUsersToGetUserReponses(users, viewmodels.UserToGetUserResponse)
+		payload := utils.MapUsersToGetUserReponses(users, viewmodels.UserToGetUserResponse)
 
-		jsonPayload, err := json.Marshal(userResponses)
-
-		if err != nil {
-			log.Println(err)
-		}
-
-		routehelpers.RespondJSON(w, jsonPayload)
+		routehelpers.RespondJSON(w, payload)
 	}
 }

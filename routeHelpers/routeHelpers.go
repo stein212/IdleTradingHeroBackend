@@ -134,15 +134,15 @@ func generateErrorPayloadFromErrorResponses(status int, errorResponses []*ErrorR
 	return payload
 }
 
-func RespondJSON(w http.ResponseWriter, jsonPayload []byte) {
+func RespondJSON(w http.ResponseWriter, payload interface{}) {
 	w.Header().Add("Content-Type", "application/json")
-	w.Write(jsonPayload)
+	json.NewEncoder(w).Encode(payload)
 }
 
 func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) *ErrorPayload {
 	if r.Header.Get("Content-Type") != "" {
 		value := r.Header.Get("Content-Type")
-		if value != "application/json" {
+		if !strings.Contains(value, "application/json") {
 			errMsg := "Content-Type header is not application/json"
 			return generateErrorPayloadFromString(http.StatusBadRequest, constants.ErrorCodeInvalidContentType, errMsg)
 		}

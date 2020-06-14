@@ -1,18 +1,21 @@
-version: "3.8"
+version: '3.8'
 
 services:
     dev:
         image: idle-trading-hero-web:latest
         environment:
             - JWT_SECRET_KEY
+            - COOKIE_HASH_KEY
+            - COOKIE_BLOCK_KEY
             - PSQL_CONNECTION_STRING
+            - ALLOWED_ORIGINS
         build:
             context: ./
             target: dev
         expose:
-            - "8080"
+            - '3000'
         ports:
-            - "8080:8080"
+            - '3000:3000'
         volumes:
             - ./:/go/src/app
         command: CompileDaemon -log-prefix=false --build='go build -o main .' --command='./main'
