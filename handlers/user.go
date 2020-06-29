@@ -6,9 +6,7 @@ import (
 	"net/http"
 
 	"github.com/IdleTradingHeroServer/models"
-	routehelpers "github.com/IdleTradingHeroServer/routeHelpers"
 	viewmodels "github.com/IdleTradingHeroServer/viewModels"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
@@ -28,10 +26,8 @@ func NewUserController(config *ControllerConfig) *UserController {
 }
 
 func (uc *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	j := r.Context().Value("user")
-	accessToken := j.(*jwt.Token)
-	userId := accessToken.Claims.(jwt.MapClaims)["userId"].(string)
-	user, err := models.Users(qm.Where("id = ?", userId)).One(context.Background(), uc.db)
+	userID := getUserIDFromJWT(r)
+	user, err := models.Users(qm.Where("id = ?", userID)).One(context.Background(), uc.db)
 
 	if err != nil {
 		logger.Println(err)
@@ -40,5 +36,5 @@ func (uc *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	payload := viewmodels.UserToGetUserResponse(user)
-	routehelpers.RespondJSON(w, payload)
+	respondJSON(w, payload)
 }

@@ -1,0 +1,101 @@
+// RUN THE FOLLOWING COMMAND AFTER EVERY CHANGE
+// python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. strategy.proto
+
+
+syntax = "proto3";
+
+package strategy_proto;
+
+import "google/protobuf/struct.proto";
+
+service StrategyService {
+    // Template
+    // rpc Function(Request) returns (Message) {}
+    
+    // Initialise indicator, strategy, parameters
+    rpc InitialiseAlgorithm(Selection) returns (Statistics) {}
+    
+    rpc StartAlgorithm(StartAlgorithmParam) returns (StartAlgorithmResponse) {}
+
+    rpc StopAlgorithm(StopAlgorithmParam) returns (StopAlgorithmResponse) {}
+
+    rpc Act(Tmp) returns (Statistics) {}
+    
+    // Get statistics
+    rpc GetStatistics(Tmp) returns (Statistics) {}
+    
+    // Get past data
+    rpc GetData(HistoryParams) returns (History) {}
+    
+    // Get past indicators
+    rpc GetIndicators(HistoryParams) returns (History) {}
+    
+    // Get past performances
+    rpc GetPerformances(HistoryParams) returns (History) {}
+}
+
+
+message HistoryParams {
+    string ID = 1;
+    int32 Length = 2;
+}
+
+// Dictionary entry
+message TimeSeries {
+    string Key = 1;
+    repeated float Value = 2;
+}
+
+// List of dictionary entries
+message History {
+    repeated TimeSeries TS = 1;
+}
+ 
+message Tmp {
+    string ID = 1;
+    int32 tmp = 2;
+}
+
+message Selection {
+    string ID = 1;
+    string Asset = 2;
+    string Strategy = 3;
+    google.protobuf.Struct Parameters = 4;
+    int32 Capital = 5;
+    string Instrument = 6;
+    string Granularity = 7;
+}
+
+message StartAlgorithmParam {
+    string ID = 1;
+}
+
+message StartAlgorithmResponse {
+    string Error = 1;
+}
+
+message StopAlgorithmParam {
+    string ID = 1;
+}
+
+message StopAlgorithmResponse {
+    string Error = 1;
+}
+
+message Statistics {
+    float v = 1; 
+    float t = 2;
+    float o = 3;
+    float h = 4;
+    float l = 5;
+    float c = 6;
+    float action = 7;
+    float balance_change = 8;
+    float stock = 9;
+    float balance = 10;
+    float return = 11;
+    float alpha = 12;
+    float sharpe = 13;
+    float annual_sharpe = 14;
+    float sortino = 15;
+}

@@ -18,8 +18,8 @@ type GetUserResponse struct {
 }
 
 func UserToGetUserResponse(user *models.User) *GetUserResponse {
-	telegramId := &user.TelegramId.Int
-	if !user.TelegramId.Valid {
+	telegramId := &user.TelegramID.Int
+	if !user.TelegramID.Valid {
 		telegramId = nil
 	}
 	return &GetUserResponse{

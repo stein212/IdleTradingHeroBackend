@@ -2,13 +2,15 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/IdleTradingHeroServer/constants"
 	"github.com/IdleTradingHeroServer/handlers"
-	idletradinghero "github.com/IdleTradingHeroServer/route/github.com/idletradinghero/v2"
+	strategy_proto "github.com/IdleTradingHeroServer/pb/strategy"
+	"github.com/IdleTradingHeroServer/repositories"
 	"github.com/IdleTradingHeroServer/utils"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -28,6 +30,12 @@ func main() {
 	}
 
 	defer db.Close()
+
+	err = db.Ping()
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Cookie config
 	cookieHashKey := []byte(os.Getenv(constants.EnvCookieHashKey))
@@ -55,23 +63,32 @@ func main() {
 	domain := os.Getenv(constants.EnvDomain)
 
 	// Setup Python service
+	strategyGRPCHost := os.Getenv(constants.EnvStrategyGRPCHost)
 	dialOption := grpc.WithInsecure()
-	conn, err := grpc.Dial("host.docker.internal:50051", dialOption)
+	fmt.Println(strategyGRPCHost)
+	conn, err := grpc.Dial(strategyGRPCHost, dialOption)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
 
-	client := idletradinghero.NewRouteClient(conn)
+	strategyClient := strategy_proto.NewStrategyServiceClient(conn)
+
+	// Setup repositories
+	strategyRepo := repositories.NewStrategyRepository(db, strategyClient)
 
 	router := httprouter.New()
 	routerConfig := &handlers.ControllerConfig{
-		DB:                  db,
-		JWTSecretKey:        jwtSecretKey,
-		JWTMiddleware:       jwtMiddleware,
-		SecureCookie:        sc,
-		Domain:              domain,
-		PythonServiceClient: client,
+		JWTSecretKey:  jwtSecretKey,
+		JWTMiddleware: jwtMiddleware,
+		SecureCookie:  sc,
+		Domain:        domain,
+
+		StrategyClient: strategyClient,
+
+		DB: db,
+
+		StrategyRepository: strategyRepo,
 	}
 	routerSetup := NewRouterSetup(routerConfig)
 	handler := routerSetup.SetupRoutes(router)

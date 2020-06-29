@@ -8,6 +8,7 @@ const (
 	EnvPsqlConnectionString = "PSQL_CONNECTION_STRING"
 	EnvAllowedOrigins       = "ALLOWED_ORIGINS"
 	EnvDomain               = "DOMAIN"
+	EnvStrategyGRPCHost     = "STRATEGY_GRPC_HOST"
 )
 
 // errors constants
@@ -24,7 +25,21 @@ const (
 	ErrorCodeRequestTooLarge = "requestTooLarge"
 )
 
-// Others
+// strategy statuses
+const (
+	StrategyNotDeployed = "notDeployed"
+	StrategyDeployed    = "deployed"
+	StrategyLive        = "live"
+	StrategyPaused      = "paused"
+)
+
+const (
+	StrategyTypeMacd = "macd"
+)
+
+var StrategyTypes = []string{StrategyTypeMacd}
+
+// others
 const (
 	CookieAuthName = "jwt"
 )

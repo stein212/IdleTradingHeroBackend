@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/IdleTradingHeroServer/models"
-	routehelpers "github.com/IdleTradingHeroServer/routeHelpers"
 	"github.com/IdleTradingHeroServer/utils"
 	viewmodels "github.com/IdleTradingHeroServer/viewModels"
 	"github.com/julienschmidt/httprouter"
@@ -21,6 +20,6 @@ func GetUsers(db *sql.DB) func(w http.ResponseWriter, r *http.Request, _ httprou
 		}
 		payload := utils.MapUsersToGetUserReponses(users, viewmodels.UserToGetUserResponse)
 
-		routehelpers.RespondJSON(w, payload)
+		respondJSON(w, payload)
 	}
 }

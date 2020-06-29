@@ -45,7 +45,15 @@ func (rs *RouterSetup) SetupRoutes(router *httprouter.Router) http.Handler {
 
 	// strategy
 	strategyController := handlers.NewStrategyController(rs.config)
-	router.POST("/strategy/macd", strategyController.GetStrategyPerformance)
+	router.POST("/strategies/macd", rs.protect(strategyController.CreateMacdStrategy))
+
+	router.GET("/strategies", rs.protect(strategyController.GetStrategies))
+	router.GET("/strategies/info/:strategyID", rs.protect(strategyController.GetMacdStrategy))
+	// router.POST("/strategies/macd/backtest", rs.protect(strategyController.GetStrategyPerformance))
+	router.POST("/strategies/initialise/:strategyID", rs.protect(strategyController.InitialiseStrategy))
+	router.POST("/strategies/start/:strategyID", rs.protect(strategyController.StartStrategy))
+	router.POST("/strategies/pause/:strategyID", rs.protect(strategyController.PauseStrategy))
+	router.GET("/strategies/getdata/:strategyID/:length", rs.protect(strategyController.GetStrategyData))
 
 	// test jwt
 	router.GET("/users", rs.protect(handlers.GetUsers(rs.config.DB)))

@@ -9,6 +9,8 @@ services:
             - COOKIE_BLOCK_KEY
             - PSQL_CONNECTION_STRING
             - ALLOWED_ORIGINS
+            - DOMAIN
+            - STRATEGY_GRPC_HOST
         build:
             context: ./
             target: dev

@@ -13,7 +13,6 @@ import (
 	"github.com/IdleTradingHeroServer/auth"
 	"github.com/IdleTradingHeroServer/constants"
 	"github.com/IdleTradingHeroServer/models"
-	routehelpers "github.com/IdleTradingHeroServer/routeHelpers"
 	"github.com/IdleTradingHeroServer/utils"
 	viewmodels "github.com/IdleTradingHeroServer/viewModels"
 	"github.com/dgrijalva/jwt-go"
@@ -73,7 +72,7 @@ func (controller *AuthController) GetAccessTokenByPassword(w http.ResponseWriter
 		AccessToken: token,
 	}
 
-	routehelpers.RespondJSON(w, payload)
+	respondJSON(w, payload)
 }
 
 func (controller *AuthController) GetCookieAuthByPassword(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -101,11 +100,11 @@ func (controller *AuthController) GetCookieAuthByPassword(w http.ResponseWriter,
 func (controller *AuthController) authByPassword(w http.ResponseWriter, r *http.Request) (*models.User, error) {
 	loginUser := &viewmodels.LoginUser{}
 
-	errPayload := routehelpers.DecodeJSONBody(w, r, loginUser)
+	errPayload := decodeJSONBody(w, r, loginUser)
 
 	if errPayload != nil {
 		logger.Println(errPayload)
-		routehelpers.RespondWithErrorPayload(logger, w, errPayload)
+		respondWithErrorPayload(logger, w, errPayload)
 		return nil, errPayload
 	}
 
@@ -113,16 +112,16 @@ func (controller *AuthController) authByPassword(w http.ResponseWriter, r *http.
 	if errs := validate.Struct(loginUser); errs != nil {
 		validationErrs, _ := errs.(validator.ValidationErrors)
 
-		errorResponses := make([]*routehelpers.ErrorResponse, len(validationErrs))
+		errorResponses := make([]*errorResponse, len(validationErrs))
 
 		for i, validationErr := range validationErrs {
-			errorResponses[i] = &routehelpers.ErrorResponse{
+			errorResponses[i] = &errorResponse{
 				Code:    constants.ErrorCodeInvalidField,
 				Message: validationErr.Translate(enTranslator),
 			}
 		}
 
-		routehelpers.RespondWithErrorPayloadFromErrorResponses(logger, w, http.StatusUnprocessableEntity, errorResponses)
+		respondWithErrorPayloadFromErrorResponses(logger, w, http.StatusUnprocessableEntity, errorResponses)
 		return nil, errs
 	}
 
@@ -150,28 +149,18 @@ func (controller *AuthController) authByPassword(w http.ResponseWriter, r *http.
 func (controller *AuthController) Register(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	registerUser := &viewmodels.RegisterUser{}
 
-	errPayload := routehelpers.DecodeJSONBody(w, r, registerUser)
+	errPayload := decodeJSONBody(w, r, registerUser)
 
 	if errPayload != nil {
 		logger.Println(errPayload)
-		routehelpers.RespondWithErrorPayload(logger, w, errPayload)
+		respondWithErrorPayload(logger, w, errPayload)
 		return
 	}
 
 	// check request
-	if errs := validate.Struct(registerUser); errs != nil {
-		validationErrs, _ := errs.(validator.ValidationErrors)
-
-		errorResponses := make([]*routehelpers.ErrorResponse, len(validationErrs))
-
-		for i, validationErr := range validationErrs {
-			errorResponses[i] = &routehelpers.ErrorResponse{
-				Code:    constants.ErrorCodeInvalidField,
-				Message: validationErr.Translate(enTranslator),
-			}
-		}
-
-		routehelpers.RespondWithErrorPayloadFromErrorResponses(logger, w, http.StatusUnprocessableEntity, errorResponses)
+	isValidPayload := validateStruct(registerUser, w, logger)
+	if !isValidPayload {
+		// handled by validateStruct
 		return
 	}
 
@@ -189,7 +178,7 @@ func (controller *AuthController) Register(w http.ResponseWriter, r *http.Reques
 		errMsg := fmt.Sprintf("Username Taken (%s)", registerUser.Username)
 		logger.Println(errMsg)
 
-		routehelpers.RespondWithErrorPayloadFromString(logger, w, http.StatusUnprocessableEntity, constants.ErrorCodeUsernameTaken, errMsg)
+		respondWithErrorPayloadFromString(logger, w, http.StatusUnprocessableEntity, constants.ErrorCodeUsernameTaken, errMsg)
 		return
 	}
 
