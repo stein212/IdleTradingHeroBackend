@@ -19,5 +19,6 @@ type ControllerConfig struct {
 
 	DB *sql.DB
 
-	StrategyRepository repositories.StrategyRepository
+	StrategyRepository      repositories.StrategyRepository
+	StrategyEventRepository repositories.StrategyEventRepository
 }

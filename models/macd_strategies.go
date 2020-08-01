@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -34,6 +35,7 @@ type MacdStrategy struct {
 	Status       string    `boil:"status" json:"status" toml:"status" yaml:"status"`
 	CreatedOn    time.Time `boil:"created_on" json:"created_on" toml:"created_on" yaml:"created_on"`
 	LastEditedOn time.Time `boil:"last_edited_on" json:"last_edited_on" toml:"last_edited_on" yaml:"last_edited_on"`
+	DeletedOn    null.Time `boil:"deleted_on" json:"deleted_on,omitempty" toml:"deleted_on" yaml:"deleted_on,omitempty"`
 
 	R *macdStrategyR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L macdStrategyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -51,6 +53,7 @@ var MacdStrategyColumns = struct {
 	Status       string
 	CreatedOn    string
 	LastEditedOn string
+	DeletedOn    string
 }{
 	ID:           "id",
 	UserID:       "user_id",
@@ -63,6 +66,7 @@ var MacdStrategyColumns = struct {
 	Status:       "status",
 	CreatedOn:    "created_on",
 	LastEditedOn: "last_edited_on",
+	DeletedOn:    "deleted_on",
 }
 
 // Generated where
@@ -120,6 +124,29 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_Time struct{ field string }
+
+func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MacdStrategyWhere = struct {
 	ID           whereHelperstring
 	UserID       whereHelperstring
@@ -132,6 +159,7 @@ var MacdStrategyWhere = struct {
 	Status       whereHelperstring
 	CreatedOn    whereHelpertime_Time
 	LastEditedOn whereHelpertime_Time
+	DeletedOn    whereHelpernull_Time
 }{
 	ID:           whereHelperstring{field: "\"macd_strategies\".\"id\""},
 	UserID:       whereHelperstring{field: "\"macd_strategies\".\"user_id\""},
@@ -144,6 +172,7 @@ var MacdStrategyWhere = struct {
 	Status:       whereHelperstring{field: "\"macd_strategies\".\"status\""},
 	CreatedOn:    whereHelpertime_Time{field: "\"macd_strategies\".\"created_on\""},
 	LastEditedOn: whereHelpertime_Time{field: "\"macd_strategies\".\"last_edited_on\""},
+	DeletedOn:    whereHelpernull_Time{field: "\"macd_strategies\".\"deleted_on\""},
 }
 
 // MacdStrategyRels is where relationship names are stored.
@@ -167,8 +196,8 @@ func (*macdStrategyR) NewStruct() *macdStrategyR {
 type macdStrategyL struct{}
 
 var (
-	macdStrategyAllColumns            = []string{"id", "user_id", "name", "instrument", "granularity", "ema26", "ema12", "ema9", "status", "created_on", "last_edited_on"}
-	macdStrategyColumnsWithoutDefault = []string{"id", "user_id", "name", "instrument", "granularity", "ema26", "ema12", "ema9", "status", "created_on", "last_edited_on"}
+	macdStrategyAllColumns            = []string{"id", "user_id", "name", "instrument", "granularity", "ema26", "ema12", "ema9", "status", "created_on", "last_edited_on", "deleted_on"}
+	macdStrategyColumnsWithoutDefault = []string{"id", "user_id", "name", "instrument", "granularity", "ema26", "ema12", "ema9", "status", "created_on", "last_edited_on", "deleted_on"}
 	macdStrategyColumnsWithDefault    = []string{}
 	macdStrategyPrimaryKeyColumns     = []string{"id"}
 )

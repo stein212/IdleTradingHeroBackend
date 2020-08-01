@@ -76,6 +76,7 @@ func main() {
 
 	// Setup repositories
 	strategyRepo := repositories.NewStrategyRepository(db, strategyClient)
+	strategyEventRepo := repositories.NewStrategyEventRepository(db)
 
 	router := httprouter.New()
 	routerConfig := &handlers.ControllerConfig{
@@ -88,7 +89,8 @@ func main() {
 
 		DB: db,
 
-		StrategyRepository: strategyRepo,
+		StrategyRepository:      strategyRepo,
+		StrategyEventRepository: strategyEventRepo,
 	}
 	routerSetup := NewRouterSetup(routerConfig)
 	handler := routerSetup.SetupRoutes(router)

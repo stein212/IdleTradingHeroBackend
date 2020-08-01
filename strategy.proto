@@ -1,5 +1,8 @@
 // RUN THE FOLLOWING COMMAND AFTER EVERY CHANGE
-// python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. strategy.proto
+// for python
+// python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. strategy.proto 
+// for go
+/// protoc -I . --go_out=plugins=grpc:pb/strategy strategy.proto
 
 
 syntax = "proto3";
@@ -32,6 +35,9 @@ service StrategyService {
     
     // Get past performances
     rpc GetPerformances(HistoryParams) returns (History) {}
+
+    // Get strategy balance
+    rpc GetBalance(GetBalanceParam) returns (GetBalanceRes) {}
 }
 
 
@@ -43,7 +49,7 @@ message HistoryParams {
 // Dictionary entry
 message TimeSeries {
     string Key = 1;
-    repeated float Value = 2;
+    repeated double Value = 2;
 }
 
 // List of dictionary entries
@@ -82,20 +88,28 @@ message StopAlgorithmResponse {
     string Error = 1;
 }
 
+message GetBalanceParam {
+    string ID = 1;
+}
+
+message GetBalanceRes {
+    double Balance = 1;
+}
+
 message Statistics {
-    float v = 1; 
-    float t = 2;
-    float o = 3;
-    float h = 4;
-    float l = 5;
-    float c = 6;
-    float action = 7;
-    float balance_change = 8;
-    float stock = 9;
-    float balance = 10;
-    float return = 11;
-    float alpha = 12;
-    float sharpe = 13;
-    float annual_sharpe = 14;
-    float sortino = 15;
+    double v = 1; 
+    double t = 2;
+    double o = 3;
+    double h = 4;
+    double l = 5;
+    double c = 6;
+    double action = 7;
+    double balance_change = 8;
+    double stock = 9;
+    double balance = 10;
+    double return = 11;
+    double alpha = 12;
+    double sharpe = 13;
+    double annual_sharpe = 14;
+    double sortino = 15;
 }

@@ -677,7 +677,7 @@ func testMacdStrategiesSelect(t *testing.T) {
 }
 
 var (
-	macdStrategyDBTypes = map[string]string{`ID`: `character varying`, `UserID`: `character varying`, `Name`: `character varying`, `Instrument`: `character varying`, `Granularity`: `character varying`, `Ema26`: `integer`, `Ema12`: `integer`, `Ema9`: `integer`, `Status`: `character varying`, `CreatedOn`: `timestamp without time zone`, `LastEditedOn`: `timestamp without time zone`}
+	macdStrategyDBTypes = map[string]string{`ID`: `character varying`, `UserID`: `character varying`, `Name`: `character varying`, `Instrument`: `character varying`, `Granularity`: `character varying`, `Ema26`: `integer`, `Ema12`: `integer`, `Ema9`: `integer`, `Status`: `character varying`, `CreatedOn`: `timestamp without time zone`, `LastEditedOn`: `timestamp without time zone`, `DeletedOn`: `timestamp without time zone`}
 	_                   = bytes.MinRead
 )
 

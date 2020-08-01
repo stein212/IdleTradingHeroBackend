@@ -13,62 +13,101 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategies)
+	t.Run("MfiStrategies", testMfiStrategies)
+	t.Run("RsiStrategies", testRsiStrategies)
+	t.Run("StrategyEvents", testStrategyEvents)
 	t.Run("Users", testUsers)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesDelete)
+	t.Run("MfiStrategies", testMfiStrategiesDelete)
+	t.Run("RsiStrategies", testRsiStrategiesDelete)
+	t.Run("StrategyEvents", testStrategyEventsDelete)
 	t.Run("Users", testUsersDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesQueryDeleteAll)
+	t.Run("MfiStrategies", testMfiStrategiesQueryDeleteAll)
+	t.Run("RsiStrategies", testRsiStrategiesQueryDeleteAll)
+	t.Run("StrategyEvents", testStrategyEventsQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesSliceDeleteAll)
+	t.Run("MfiStrategies", testMfiStrategiesSliceDeleteAll)
+	t.Run("RsiStrategies", testRsiStrategiesSliceDeleteAll)
+	t.Run("StrategyEvents", testStrategyEventsSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesExists)
+	t.Run("MfiStrategies", testMfiStrategiesExists)
+	t.Run("RsiStrategies", testRsiStrategiesExists)
+	t.Run("StrategyEvents", testStrategyEventsExists)
 	t.Run("Users", testUsersExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesFind)
+	t.Run("MfiStrategies", testMfiStrategiesFind)
+	t.Run("RsiStrategies", testRsiStrategiesFind)
+	t.Run("StrategyEvents", testStrategyEventsFind)
 	t.Run("Users", testUsersFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesBind)
+	t.Run("MfiStrategies", testMfiStrategiesBind)
+	t.Run("RsiStrategies", testRsiStrategiesBind)
+	t.Run("StrategyEvents", testStrategyEventsBind)
 	t.Run("Users", testUsersBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesOne)
+	t.Run("MfiStrategies", testMfiStrategiesOne)
+	t.Run("RsiStrategies", testRsiStrategiesOne)
+	t.Run("StrategyEvents", testStrategyEventsOne)
 	t.Run("Users", testUsersOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesAll)
+	t.Run("MfiStrategies", testMfiStrategiesAll)
+	t.Run("RsiStrategies", testRsiStrategiesAll)
+	t.Run("StrategyEvents", testStrategyEventsAll)
 	t.Run("Users", testUsersAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesCount)
+	t.Run("MfiStrategies", testMfiStrategiesCount)
+	t.Run("RsiStrategies", testRsiStrategiesCount)
+	t.Run("StrategyEvents", testStrategyEventsCount)
 	t.Run("Users", testUsersCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesHooks)
+	t.Run("MfiStrategies", testMfiStrategiesHooks)
+	t.Run("RsiStrategies", testRsiStrategiesHooks)
+	t.Run("StrategyEvents", testStrategyEventsHooks)
 	t.Run("Users", testUsersHooks)
 }
 
 func TestInsert(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesInsert)
 	t.Run("MacdStrategies", testMacdStrategiesInsertWhitelist)
+	t.Run("MfiStrategies", testMfiStrategiesInsert)
+	t.Run("MfiStrategies", testMfiStrategiesInsertWhitelist)
+	t.Run("RsiStrategies", testRsiStrategiesInsert)
+	t.Run("RsiStrategies", testRsiStrategiesInsertWhitelist)
+	t.Run("StrategyEvents", testStrategyEventsInsert)
+	t.Run("StrategyEvents", testStrategyEventsInsertWhitelist)
 	t.Run("Users", testUsersInsert)
 	t.Run("Users", testUsersInsertWhitelist)
 }
@@ -77,6 +116,8 @@ func TestInsert(t *testing.T) {
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
 	t.Run("MacdStrategyToUserUsingUser", testMacdStrategyToOneUserUsingUser)
+	t.Run("MfiStrategyToUserUsingUser", testMfiStrategyToOneUserUsingUser)
+	t.Run("RsiStrategyToUserUsingUser", testRsiStrategyToOneUserUsingUser)
 }
 
 // TestOneToOne tests cannot be run in parallel
@@ -87,12 +128,16 @@ func TestOneToOne(t *testing.T) {}
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
 	t.Run("UserToMacdStrategies", testUserToManyMacdStrategies)
+	t.Run("UserToMfiStrategies", testUserToManyMfiStrategies)
+	t.Run("UserToRsiStrategies", testUserToManyRsiStrategies)
 }
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
 	t.Run("MacdStrategyToUserUsingMacdStrategies", testMacdStrategyToOneSetOpUserUsingUser)
+	t.Run("MfiStrategyToUserUsingMfiStrategies", testMfiStrategyToOneSetOpUserUsingUser)
+	t.Run("RsiStrategyToUserUsingRsiStrategies", testRsiStrategyToOneSetOpUserUsingUser)
 }
 
 // TestToOneRemove tests cannot be run in parallel
@@ -111,6 +156,8 @@ func TestOneToOneRemove(t *testing.T) {}
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
 	t.Run("UserToMacdStrategies", testUserToManyAddOpMacdStrategies)
+	t.Run("UserToMfiStrategies", testUserToManyAddOpMfiStrategies)
+	t.Run("UserToRsiStrategies", testUserToManyAddOpRsiStrategies)
 }
 
 // TestToManySet tests cannot be run in parallel
@@ -123,25 +170,40 @@ func TestToManyRemove(t *testing.T) {}
 
 func TestReload(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesReload)
+	t.Run("MfiStrategies", testMfiStrategiesReload)
+	t.Run("RsiStrategies", testRsiStrategiesReload)
+	t.Run("StrategyEvents", testStrategyEventsReload)
 	t.Run("Users", testUsersReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesReloadAll)
+	t.Run("MfiStrategies", testMfiStrategiesReloadAll)
+	t.Run("RsiStrategies", testRsiStrategiesReloadAll)
+	t.Run("StrategyEvents", testStrategyEventsReloadAll)
 	t.Run("Users", testUsersReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesSelect)
+	t.Run("MfiStrategies", testMfiStrategiesSelect)
+	t.Run("RsiStrategies", testRsiStrategiesSelect)
+	t.Run("StrategyEvents", testStrategyEventsSelect)
 	t.Run("Users", testUsersSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesUpdate)
+	t.Run("MfiStrategies", testMfiStrategiesUpdate)
+	t.Run("RsiStrategies", testRsiStrategiesUpdate)
+	t.Run("StrategyEvents", testStrategyEventsUpdate)
 	t.Run("Users", testUsersUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesSliceUpdateAll)
+	t.Run("MfiStrategies", testMfiStrategiesSliceUpdateAll)
+	t.Run("RsiStrategies", testRsiStrategiesSliceUpdateAll)
+	t.Run("StrategyEvents", testStrategyEventsSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
 }

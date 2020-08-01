@@ -31,10 +31,13 @@ const (
 	StrategyDeployed    = "deployed"
 	StrategyLive        = "live"
 	StrategyPaused      = "paused"
+	StrategyDeleted     = "deleted"
 )
 
 const (
 	StrategyTypeMacd = "macd"
+	StrategyTypeMfi  = "mfi"
+	StrategyTypeRsi  = "rsi"
 )
 
 var StrategyTypes = []string{StrategyTypeMacd}

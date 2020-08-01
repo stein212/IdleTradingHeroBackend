@@ -8,5 +8,11 @@ import "testing"
 func TestUpsert(t *testing.T) {
 	t.Run("MacdStrategies", testMacdStrategiesUpsert)
 
+	t.Run("MfiStrategies", testMfiStrategiesUpsert)
+
+	t.Run("RsiStrategies", testRsiStrategiesUpsert)
+
+	t.Run("StrategyEvents", testStrategyEventsUpsert)
+
 	t.Run("Users", testUsersUpsert)
 }

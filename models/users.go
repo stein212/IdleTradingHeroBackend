@@ -105,13 +105,19 @@ var UserWhere = struct {
 // UserRels is where relationship names are stored.
 var UserRels = struct {
 	MacdStrategies string
+	MfiStrategies  string
+	RsiStrategies  string
 }{
 	MacdStrategies: "MacdStrategies",
+	MfiStrategies:  "MfiStrategies",
+	RsiStrategies:  "RsiStrategies",
 }
 
 // userR is where relationships are stored.
 type userR struct {
 	MacdStrategies MacdStrategySlice
+	MfiStrategies  MfiStrategySlice
+	RsiStrategies  RsiStrategySlice
 }
 
 // NewStruct creates a new relationship struct
@@ -425,6 +431,48 @@ func (o *User) MacdStrategies(mods ...qm.QueryMod) macdStrategyQuery {
 	return query
 }
 
+// MfiStrategies retrieves all the mfi_strategy's MfiStrategies with an executor.
+func (o *User) MfiStrategies(mods ...qm.QueryMod) mfiStrategyQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"mfi_strategies\".\"user_id\"=?", o.ID),
+	)
+
+	query := MfiStrategies(queryMods...)
+	queries.SetFrom(query.Query, "\"mfi_strategies\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"mfi_strategies\".*"})
+	}
+
+	return query
+}
+
+// RsiStrategies retrieves all the rsi_strategy's RsiStrategies with an executor.
+func (o *User) RsiStrategies(mods ...qm.QueryMod) rsiStrategyQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"rsi_strategies\".\"user_id\"=?", o.ID),
+	)
+
+	query := RsiStrategies(queryMods...)
+	queries.SetFrom(query.Query, "\"rsi_strategies\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"rsi_strategies\".*"})
+	}
+
+	return query
+}
+
 // LoadMacdStrategies allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (userL) LoadMacdStrategies(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
@@ -520,6 +568,196 @@ func (userL) LoadMacdStrategies(ctx context.Context, e boil.ContextExecutor, sin
 	return nil
 }
 
+// LoadMfiStrategies allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadMfiStrategies(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		object = maybeUser.(*User)
+	} else {
+		slice = *maybeUser.(*[]*User)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`mfi_strategies`), qm.WhereIn(`mfi_strategies.user_id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load mfi_strategies")
+	}
+
+	var resultSlice []*MfiStrategy
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice mfi_strategies")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on mfi_strategies")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for mfi_strategies")
+	}
+
+	if len(mfiStrategyAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.MfiStrategies = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &mfiStrategyR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.UserID {
+				local.R.MfiStrategies = append(local.R.MfiStrategies, foreign)
+				if foreign.R == nil {
+					foreign.R = &mfiStrategyR{}
+				}
+				foreign.R.User = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadRsiStrategies allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadRsiStrategies(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		object = maybeUser.(*User)
+	} else {
+		slice = *maybeUser.(*[]*User)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`rsi_strategies`), qm.WhereIn(`rsi_strategies.user_id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load rsi_strategies")
+	}
+
+	var resultSlice []*RsiStrategy
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice rsi_strategies")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on rsi_strategies")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for rsi_strategies")
+	}
+
+	if len(rsiStrategyAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.RsiStrategies = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &rsiStrategyR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.UserID {
+				local.R.RsiStrategies = append(local.R.RsiStrategies, foreign)
+				if foreign.R == nil {
+					foreign.R = &rsiStrategyR{}
+				}
+				foreign.R.User = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // AddMacdStrategies adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
 // Appends related to o.R.MacdStrategies.
@@ -564,6 +802,112 @@ func (o *User) AddMacdStrategies(ctx context.Context, exec boil.ContextExecutor,
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &macdStrategyR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
+	}
+	return nil
+}
+
+// AddMfiStrategies adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.MfiStrategies.
+// Sets related.R.User appropriately.
+func (o *User) AddMfiStrategies(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*MfiStrategy) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"mfi_strategies\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, mfiStrategyPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			MfiStrategies: related,
+		}
+	} else {
+		o.R.MfiStrategies = append(o.R.MfiStrategies, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &mfiStrategyR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
+	}
+	return nil
+}
+
+// AddRsiStrategies adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.RsiStrategies.
+// Sets related.R.User appropriately.
+func (o *User) AddRsiStrategies(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RsiStrategy) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"rsi_strategies\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, rsiStrategyPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			RsiStrategies: related,
+		}
+	} else {
+		o.R.RsiStrategies = append(o.R.RsiStrategies, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &rsiStrategyR{
 				User: o,
 			}
 		} else {

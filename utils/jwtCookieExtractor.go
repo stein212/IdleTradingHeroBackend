@@ -12,7 +12,7 @@ func CreateJWTCookieExtractor(secureCookie *securecookie.SecureCookie) func(r *h
 		jwtCookie, err := r.Cookie(constants.CookieAuthName)
 
 		if err != nil {
-			return "", err
+			return "", nil // no error just no token
 		}
 
 		var jwt string

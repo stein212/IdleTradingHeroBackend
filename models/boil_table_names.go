@@ -5,8 +5,14 @@ package models
 
 var TableNames = struct {
 	MacdStrategies string
+	MfiStrategies  string
+	RsiStrategies  string
+	StrategyEvents string
 	Users          string
 }{
 	MacdStrategies: "macd_strategies",
+	MfiStrategies:  "mfi_strategies",
+	RsiStrategies:  "rsi_strategies",
+	StrategyEvents: "strategy_events",
 	Users:          "users",
 }
